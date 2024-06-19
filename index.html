@@ -13,6 +13,8 @@
             height: 100vh;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
+            margin: 0;
+            position: relative;
         }
         #contador {
             font-size: 3em;
@@ -22,27 +24,62 @@
             font-size: 1.5em;
             margin-top: 10px;
         }
+        #reiniciar {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <div id="contador">5</div>
-    <div id="texto">Días sin que el Eze Leakee una pass</div>
+    <div id="contador">0</div>
+    <div id="texto">Dias sin irme de viaje</div>
+    <button id="reiniciar"></button>
 
     <script>
-        // Definimos la variable inicial
-        let contador = 5;
-        // Obtenemos el elemento del DOM
         const contadorElemento = document.getElementById('contador');
+        const botonReiniciar = document.getElementById('reiniciar');
 
-        // Función para cambiar el contador a 0
-        const cambiarContador = () => {
+        // Obtiene la fecha actual en formato YYYY-MM-DD
+        const obtenerFechaActual = () => {
+            const hoy = new Date();
+            return hoy.toISOString().split('T')[0];
+        };
+
+        // Obtiene el contador y la última fecha almacenada en localStorage
+        const contadorGuardado = localStorage.getItem('contador') || 0;
+        const ultimaFechaGuardada = localStorage.getItem('ultimaFecha') || obtenerFechaActual();
+
+        let contador = parseInt(contadorGuardado);
+        const ultimaFecha = ultimaFechaGuardada;
+
+        const fechaActual = obtenerFechaActual();
+
+        // Si la fecha actual es diferente a la última fecha guardada, incrementa el contador y actualiza la fecha
+        if (fechaActual !== ultimaFecha) {
+            contador++;
+            localStorage.setItem('contador', contador);
+            localStorage.setItem('ultimaFecha', fechaActual);
+        }
+
+        // Actualiza el texto del contador en la página
+        contadorElemento.textContent = contador;
+
+        // Función para reiniciar el contador
+        const reiniciarContador = () => {
             contador = 0;
+            localStorage.setItem('contador', contador);
+            localStorage.setItem('ultimaFecha', obtenerFechaActual());
             contadorElemento.textContent = contador;
         };
 
-        // Cambiar el contador a 0 después de 3 segundos
-        setTimeout(cambiarContador, 2000);
+        // Añade el evento de clic al botón de reiniciar
+        botonReiniciar.addEventListener('click', reiniciarContador);
     </script>
 </body>
 </html>
-
