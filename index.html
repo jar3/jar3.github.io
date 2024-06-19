@@ -1,9 +1,47 @@
-<html>
-	<head>
-		<title>Warm up life</title>
-	</head>
-	<body>
-	Dias sin que el Eze Leakee una pass 0
-	</body>
-</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #contador {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        #texto {
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="contador">3096</div>
+    <div id="texto">Días sin que el Eze Leakee una pass</div>
 
+    <script>
+        // Definimos la variable inicial
+        let contador = 3096;
+        // Obtenemos el elemento del DOM
+        const contadorElemento = document.getElementById('contador');
+
+        // Función para cambiar el contador a 0
+        const cambiarContador = () => {
+            contador = 0;
+            contadorElemento.textContent = contador;
+        };
+
+        // Cambiamos el contador a 0 inmediatamente
+        cambiarContador();
+    </script>
+</body>
+</html>
