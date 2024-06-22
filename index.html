@@ -35,31 +35,29 @@
             cursor: pointer;
         }
     </style>
+    <!-- Importar Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7kJR_ya0N6uFawxlbgp2AwbiTD596C4s",
+            authDomain: "contador-capatres.firebaseapp.com",
+            databaseURL: "https://contador-capatres.firebaseio.com",
+            projectId: "contador-capatres",
+            storageBucket: "contador-capatres.appspot.com",
+            messagingSenderId: "174595932515",
+            appId: "1:174595932515:web:4937e59adc08e756ca9356",
+            measurementId: "G-XZEMS1K4ML"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+    </script>
 </head>
 <body>
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-     // TODO: Add SDKs for Firebase products that you want to use
-     // https://firebase.google.com/docs/web/setup#available-libraries
-
-     // Your web app's Firebase configuration
-     // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-     const firebaseConfig = {
-       apiKey: "AIzaSyB7kJR_ya0N6uFawxlbgp2AwbiTD596C4s",
-       authDomain: "contador-capatres.firebaseapp.com",
-       projectId: "contador-capatres",
-       storageBucket: "contador-capatres.appspot.com",
-       messagingSenderId: "174595932515",
-       appId: "1:174595932515:web:4937e59adc08e756ca9356",
-       measurementId: "G-XZEMS1K4ML"
-     };
-
-     // Initialize Firebase
-     const app = initializeApp(firebaseConfig);
-     const analytics = getAnalytics(app);
-    </script>
     <div id="contador">0d 0h 0m 0s</div>
     <div id="texto">Días sin irme de viaje</div>
     <button id="reiniciar"></button>
