@@ -56,33 +56,39 @@
         const database = firebase.database();
 
         // Referencia a la fecha de inicio en Firebase
-        const fechaInicioRef = database.ref('contador-dias-sin-viaje/fechaInicio');
+        const fechaInicioRef = database.ref('contador-dias-sin-viaje');
 
         // Función para obtener la fecha actual en milisegundos
         const obtenerFechaActual = () => new Date().getTime();
 
+        // Función para inicializar la fecha de inicio si no está definida
+        const inicializarFechaInicio = () => {
+            fechaInicioRef.once('value', snapshot => {
+                const fechaInicio = snapshot.val()?.fechaInicio;
+                if (!fechaInicio) {
+                    const fechaActual = obtenerFechaActual();
+                    fechaInicioRef.set({ fechaInicio: fechaActual });
+                }
+                actualizarContador();
+            });
+        };
+
         // Función para actualizar la fecha de inicio en Firebase
         const actualizarFechaInicio = () => {
             const fechaActual = obtenerFechaActual();
-            fechaInicioRef.set(fechaActual);
+            fechaInicioRef.set({ fechaInicio: fechaActual });
         };
 
         // Función para obtener la fecha de inicio desde Firebase
         const obtenerFechaInicio = () => {
-            return fechaInicioRef.once('value').then(snapshot => {
-                const fechaInicio = snapshot.val();
-                if (fechaInicio) {
-                    return fechaInicio;
-                } else {
-                    return null;
-                }
+            return fechaInicioRef.child('fechaInicio').once('value').then(snapshot => {
+                return snapshot.val();
             });
         };
 
         // Función para reiniciar el contador
         const reiniciarContador = () => {
             actualizarFechaInicio();
-            actualizarContador();
         };
 
         // Elementos del DOM
@@ -115,11 +121,9 @@
         // Añade el evento de clic al botón de reiniciar
         botonReiniciar.addEventListener('click', reiniciarContador);
 
-        // Actualiza el contador cada segundo
-        setInterval(actualizarContador, 1000);
-
-        // Al cargar la página, actualizar el contador
-        actualizarContador();
+        // Al cargar la página, inicializar y actualizar el contador
+        inicializarFechaInicio();
+        setInterval(actualizarContador, 1000); // Actualizar cada segundo
     </script>
 </head>
 <body>
