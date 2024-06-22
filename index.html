@@ -36,10 +36,9 @@
         }
     </style>
     <!-- Importar Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+    <script>
         // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyB7kJR_ya0N6uFawxlbgp2AwbiTD596C4s",
@@ -53,73 +52,64 @@
         };
 
         // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-    </script>
-</head>
-<body>
-    <div id="contador">0d 0h 0m 0s</div>
-    <div id="texto">Días sin irme de viaje</div>
-    <button id="reiniciar"></button>
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    <script>
-        const contadorElemento = document.getElementById('contador');
-        const botonReiniciar = document.getElementById('reiniciar');
+        // Referencia a la fecha de inicio en Firebase
+        const fechaInicioRef = database.ref('contador-dias-sin-viaje/fechaInicio');
 
         // Función para obtener la fecha actual en milisegundos
         const obtenerFechaActual = () => new Date().getTime();
 
-        // Función para establecer una cookie
-        const setCookie = (nombre, valor, dias) => {
-            const fecha = new Date();
-            fecha.setTime(fecha.getTime() + (dias * 24 * 60 * 60 * 1000));
-            const expira = "expires=" + fecha.toUTCString();
-            document.cookie = nombre + "=" + valor + ";" + expira + ";path=/";
+        // Función para actualizar la fecha de inicio en Firebase
+        const actualizarFechaInicio = () => {
+            const fechaActual = obtenerFechaActual();
+            fechaInicioRef.set(fechaActual);
         };
 
-        // Función para obtener una cookie por nombre
-        const getCookie = (nombre) => {
-            const nombreEQ = nombre + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') {
-                    c = c.substring(1);
+        // Función para obtener la fecha de inicio desde Firebase
+        const obtenerFechaInicio = () => {
+            return fechaInicioRef.once('value').then(snapshot => {
+                const fechaInicio = snapshot.val();
+                if (fechaInicio) {
+                    return fechaInicio;
+                } else {
+                    return null;
                 }
-                if (c.indexOf(nombreEQ) === 0) {
-                    return c.substring(nombreEQ.length, c.length);
-                }
-            }
-            return "";
-        };
-
-        // Obtiene la fecha de inicio almacenada en cookies o la establece a la fecha actual
-        let fechaInicio = getCookie('fechaInicio') || obtenerFechaActual();
-        if (!getCookie('fechaInicio')) {
-            setCookie('fechaInicio', fechaInicio, 3650); // 10 años
-        } else {
-            fechaInicio = parseInt(fechaInicio);
-        }
-
-        // Función para actualizar el contador
-        const actualizarContador = () => {
-            const ahora = obtenerFechaActual();
-            const diferencia = ahora - fechaInicio;
-
-            const segundosTotales = Math.floor(diferencia / 1000);
-            const dias = Math.floor(segundosTotales / (3600 * 24));
-            const horas = Math.floor((segundosTotales % (3600 * 24)) / 3600);
-            const minutos = Math.floor((segundosTotales % 3600) / 60);
-            const segundos = segundosTotales % 60;
-
-            contadorElemento.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+            });
         };
 
         // Función para reiniciar el contador
         const reiniciarContador = () => {
-            fechaInicio = obtenerFechaActual();
-            setCookie('fechaInicio', fechaInicio, 3650); // 10 años
+            actualizarFechaInicio();
             actualizarContador();
+        };
+
+        // Elementos del DOM
+        const contadorElemento = document.getElementById('contador');
+        const botonReiniciar = document.getElementById('reiniciar');
+
+        // Función para actualizar el contador
+        const actualizarContador = () => {
+            obtenerFechaInicio().then(fechaInicio => {
+                if (fechaInicio) {
+                    const ahora = obtenerFechaActual();
+                    const diferencia = ahora - fechaInicio;
+
+                    const segundosTotales = Math.floor(diferencia / 1000);
+                    const dias = Math.floor(segundosTotales / (3600 * 24));
+                    const horas = Math.floor((segundosTotales % (3600 * 24)) / 3600);
+                    const minutos = Math.floor((segundosTotales % 3600) / 60);
+                    const segundos = segundosTotales % 60;
+
+                    contadorElemento.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+                } else {
+                    // Si no hay fecha de inicio, mostrar contador en cero
+                    contadorElemento.textContent = `0d 0h 0m 0s`;
+                }
+            }).catch(error => {
+                console.error('Error al obtener fecha de inicio desde Firebase:', error);
+            });
         };
 
         // Añade el evento de clic al botón de reiniciar
@@ -128,8 +118,13 @@
         // Actualiza el contador cada segundo
         setInterval(actualizarContador, 1000);
 
-        // Actualiza el contador al cargar la página
+        // Al cargar la página, actualizar el contador
         actualizarContador();
     </script>
+</head>
+<body>
+    <div id="contador">0d 0h 0m 0s</div>
+    <div id="texto">Días sin irme de viaje</div>
+    <button id="reiniciar"></button>
 </body>
 </html>
