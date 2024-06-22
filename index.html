@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warm Up Life</title>
+    <title>Contador de Días sin Reinicio - Firebase Realtime Database</title>
     <style>
         body {
             display: flex;
@@ -11,132 +11,69 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: orange;
+            background-color: #f0f0f0;
             font-family: Arial, sans-serif;
             margin: 0;
-            position: relative;
         }
         #contador {
             font-size: 3em;
             font-weight: bold;
+            margin-bottom: 20px;
         }
         #texto {
             font-size: 1.5em;
-            margin-top: 10px;
         }
         #reiniciar {
-            width: 1px;
-            height: 1px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: transparent;
-            border: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
             cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        #reiniciar:hover {
+            background-color: #0056b3;
         }
     </style>
-    <!-- Importar Firebase SDK -->
+</head>
+<body>
+    <div id="contador">Cargando contador...</div>
+    <div id="texto">Días sin irme de viaje</div>
+    <button id="reiniciar">Reiniciar Contador</button>
+
+    <!-- Importar el SDK de Firebase Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyB7kJR_ya0N6uFawxlbgp2AwbiTD596C4s",
-            authDomain: "contador-capatres.firebaseapp.com",
-            databaseURL: "https://contador-capatres.firebaseio.com",
-            projectId: "contador-capatres",
-            storageBucket: "contador-capatres.appspot.com",
-            messagingSenderId: "174595932515",
-            appId: "1:174595932515:web:4937e59adc08e756ca9356",
-            measurementId: "G-XZEMS1K4ML"
+            databaseURL: "https://contador-capatres-default-rtdb.firebaseio.com/"
         };
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = firebase.database();
 
-        // Referencia al documento en Firestore
-        const docRef = db.collection('contador-dias-sin-viaje').doc('contador');
+        // Referencia al contador en la base de datos
+        const contadorRef = db.ref('contador');
 
-        // Función para obtener la fecha actual en milisegundos
-        const obtenerFechaActual = () => new Date().getTime();
-
-        // Función para inicializar la fecha de inicio si no está definida
-        const inicializarFechaInicio = () => {
-            docRef.get().then(doc => {
-                if (!doc.exists) {
-                    const fechaActual = obtenerFechaActual();
-                    docRef.set({ fechaInicio: fechaActual });
-                }
-                actualizarContador();
-            }).catch(error => {
-                console.error('Error al obtener documento:', error);
-            });
-        };
-
-        // Función para actualizar la fecha de inicio en Firestore
-        const actualizarFechaInicio = () => {
-            const fechaActual = obtenerFechaActual();
-            docRef.set({ fechaInicio: fechaActual });
-        };
-
-        // Función para obtener la fecha de inicio desde Firestore
-        const obtenerFechaInicio = () => {
-            return docRef.get().then(doc => {
-                if (doc.exists) {
-                    return doc.data().fechaInicio;
-                } else {
-                    return null;
-                }
-            }).catch(error => {
-                console.error('Error al obtener documento:', error);
-                return null;
-            });
-        };
+        // Obtener y mostrar el valor del contador
+        contadorRef.on('value', (snapshot) => {
+            const contador = snapshot.val();
+            document.getElementById('contador').textContent = `${contador} días`;
+        });
 
         // Función para reiniciar el contador
         const reiniciarContador = () => {
-            actualizarFechaInicio();
+            contadorRef.set(0); // Establecer el contador a cero en la base de datos
         };
 
-        // Elementos del DOM
-        const contadorElemento = document.getElementById('contador');
-        const botonReiniciar = document.getElementById('reiniciar');
-
-        // Función para actualizar el contador
-        const actualizarContador = () => {
-            obtenerFechaInicio().then(fechaInicio => {
-                if (fechaInicio) {
-                    const ahora = obtenerFechaActual();
-                    const diferencia = ahora - fechaInicio;
-
-                    const segundosTotales = Math.floor(diferencia / 1000);
-                    const dias = Math.floor(segundosTotales / (3600 * 24));
-                    const horas = Math.floor((segundosTotales % (3600 * 24)) / 3600);
-                    const minutos = Math.floor((segundosTotales % 3600) / 60);
-                    const segundos = segundosTotales % 60;
-
-                    contadorElemento.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
-                } else {
-                    // Si no hay fecha de inicio, mostrar contador en cero
-                    contadorElemento.textContent = `0d 0h 0m 0s`;
-                }
-            }).catch(error => {
-                console.error('Error al obtener fecha de inicio desde Firestore:', error);
-            });
-        };
-
-        // Añade el evento de clic al botón de reiniciar
-        botonReiniciar.addEventListener('click', reiniciarContador);
-
-        // Al cargar la página, inicializar y actualizar el contador
-        inicializarFechaInicio();
-        setInterval(actualizarContador, 1000); // Actualizar cada segundo
+        // Añadir evento de clic al botón de reiniciar
+        document.getElementById('reiniciar').addEventListener('click', reiniciarContador);
     </script>
-</head>
-<body>
-    <div id="contador">0d 0h 0m 0s</div>
-    <div id="texto">Días sin irme de viaje</div>
-    <button id="reiniciar">Reiniciar Contador</button>
 </body>
 </html>
