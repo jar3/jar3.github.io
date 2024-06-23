@@ -1,121 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warm Up Life</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: orange;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            position: relative;
-        }
-        #contador {
-            font-size: 3em;
-            font-weight: bold;
-        }
-        #texto {
-            font-size: 1.5em;
-            margin-top: 10px;
-        }
-        #reiniciar {
-            width: 1px;
-            height: 1px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
+<meta charset="UTF-8">
+<title>Contador Persistente con GitHub Gist</title>
 </head>
 <body>
-    <div id="contador">0d 0h 0m 0s</div>
-    <div id="texto">Días sin irme de viaje</div>
-    <button id="reiniciar"></button>
+<h1>Contador Persistente</h1>
+<div id="contador"></div>
 
-    <script>
-        // TODO: Replace the following with your app's Firebase project configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyB7kJR_ya0N6uFawxlbgp2AwbiTD596C4s",
-          authDomain: "contador-capatres.firebaseapp.com",
-          databaseURL: "https://contador-capatres-default-rtdb.firebaseio.com",
-          projectId: "contador-capatres",
-          storageBucket: "contador-capatres.appspot.com",
-          messagingSenderId: "174595932515",
-          appId: "1:174595932515:web:4937e59adc08e756ca9356",
-          measurementId: "G-XZEMS1K4ML"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+<script>
+// Configuración del Gist
+const gistId = 'a0faa69cc0f1a4a439cfcd1b58afbcd5';
 
-        const contadorElemento = document.getElementById('contador');
-        const botonReiniciar = document.getElementById('reiniciar');
+// Función para obtener la fecha/hora de inicio del contador desde el Gist
+async function obtenerInicio() {
+const response = await fetch(`https://api.github.com/gists/${gistId}`);
+const data = await response.json();
+return new Date(JSON.parse(data.files['contador.json'].content).inicio);
+}
 
-        let fechaInicio;
+// Función que actualiza el contador
+async function actualizarContador() {
+// Obtener la fecha/hora de inicio desde el Gist
+const inicio = await obtenerInicio();
+const ahora = new Date().getTime();
+const diferencia = ahora - inicio.getTime();
 
-        // Función para obtener la fecha de inicio desde Firestore
-        const obtenerFechaInicio = async () => {
-            try {
-                const doc = await db.collection('contador').doc('fechaInicio').get();
-                if (doc.exists) {
-                    fechaInicio = doc.data().timestamp.toMillis();
-                    actualizarContador();
-                } else {
-                    // Si no existe el documento, establecer la fecha actual como fecha de inicio
-                    fechaInicio = Date.now();
-                    await db.collection('contador').doc('fechaInicio').set({ timestamp: firebase.firestore.Timestamp.fromMillis(fechaInicio) });
-                }
-            } catch (error) {
-                console.error('Error al obtener la fecha de inicio:', error);
-            }
-        };
+// Calcular la diferencia y actualizar el contador en la página
+const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
 
-        // Función para reiniciar la fecha de inicio en Firestore
-        const reiniciarFechaInicio = async () => {
-            try {
-                fechaInicio = Date.now();
-                await db.collection('contador').doc('fechaInicio').set({ timestamp: firebase.firestore.Timestamp.fromMillis(fechaInicio) });
-                actualizarContador();
-            } catch (error) {
-                console.error('Error al reiniciar la fecha de inicio:', error);
-            }
-        };
+document.getElementById('contador').innerHTML = dias + "d " + horas + "h "
++ minutos + "m " + segundos + "s ";
+}
 
-        // Función para actualizar el contador
-        const actualizarContador = () => {
-            const ahora = Date.now();
-            const diferencia = ahora - fechaInicio;
-
-            const segundosTotales = Math.floor(diferencia / 1000);
-            const dias = Math.floor(segundosTotales / (3600 * 24));
-            const horas = Math.floor((segundosTotales % (3600 * 24)) / 3600);
-            const minutos = Math.floor((segundosTotales % 3600) / 60);
-            const segundos = segundosTotales % 60;
-
-            contadorElemento.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
-        };
-
-        // Añade el evento de clic al botón de reiniciar
-        botonReiniciar.addEventListener('click', reiniciarFechaInicio);
-
-        // Actualiza el contador cada segundo
-        setInterval(actualizarContador, 1000);
-
-        // Obtiene la fecha de inicio al cargar la página
-        obtenerFechaInicio();
-    </script>
+// Iniciar el contador
+actualizarContador();
+// Actualizar el contador cada segundo
+setInterval(actualizarContador, 1000);
+</script>
 </body>
 </html>
+
 
