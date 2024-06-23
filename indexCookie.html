@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warm Up Life</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: orange;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            position: relative;
+        }
+        #contador {
+            font-size: 3em;
+            font-weight: bold;
+        }
+        #texto {
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+        #reiniciar {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="contador">0d 0h 0m 0s</div>
+    <div id="texto">Días sin irme de viaje</div>
+    <button id="reiniciar"></button>
+
+    <script>
+        const contadorElemento = document.getElementById('contador');
+        const botonReiniciar = document.getElementById('reiniciar');
+
+        // Función para obtener la fecha actual en milisegundos
+        const obtenerFechaActual = () => new Date().getTime();
+
+        // Función para establecer una cookie
+        const setCookie = (nombre, valor, dias) => {
+            const fecha = new Date();
+            fecha.setTime(fecha.getTime() + (dias * 24 * 60 * 60 * 1000));
+            const expira = "expires=" + fecha.toUTCString();
+            document.cookie = nombre + "=" + valor + ";" + expira + ";path=/";
+        };
+
+        // Función para obtener una cookie por nombre
+        const getCookie = (nombre) => {
+            const nombreEQ = nombre + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(nombreEQ) === 0) {
+                    return c.substring(nombreEQ.length, c.length);
+                }
+            }
+            return "";
+        };
+
+        // Obtiene la fecha de inicio almacenada en cookies o la establece a la fecha actual
+        let fechaInicio = getCookie('fechaInicio') || obtenerFechaActual();
+        if (!getCookie('fechaInicio')) {
+            setCookie('fechaInicio', fechaInicio, 3650); // 10 años
+        } else {
+            fechaInicio = parseInt(fechaInicio);
+        }
+
+        // Función para actualizar el contador
+        const actualizarContador = () => {
+            const ahora = obtenerFechaActual();
+            const diferencia = ahora - fechaInicio;
+
+            const segundosTotales = Math.floor(diferencia / 1000);
+            const dias = Math.floor(segundosTotales / (3600 * 24));
+            const horas = Math.floor((segundosTotales % (3600 * 24)) / 3600);
+            const minutos = Math.floor((segundosTotales % 3600) / 60);
+            const segundos = segundosTotales % 60;
+
+            contadorElemento.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+        };
+
+        // Función para reiniciar el contador
+        const reiniciarContador = () => {
+            fechaInicio = obtenerFechaActual();
+            setCookie('fechaInicio', fechaInicio, 3650); // 10 años
+            actualizarContador();
+        };
+
+        // Añade el evento de clic al botón de reiniciar
+        botonReiniciar.addEventListener('click', reiniciarContador);
+
+        // Actualiza el contador cada segundo
+        setInterval(actualizarContador, 1000);
+
+        // Actualiza el contador al cargar la página
+        actualizarContador();
+    </script>
+</body>
+</html>
