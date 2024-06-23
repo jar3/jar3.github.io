@@ -73,5 +73,41 @@ document.getElementById("contador").innerHTML = "It's time for your trip!";
 }
 }, 1000);
 </script>
+
+<h1>Time without going on a trip</h1>
+<script>
+// Configuración del Gist
+const gistId = 'a0faa69cc0f1a4a439cfcd1b58afbcd5';
+
+// Función para obtener la fecha/hora de inicio del contador desde el Gist
+async function obtenerInicio() {
+const response = await fetch(`https://api.github.com/gists/${gistId}`);
+const data = await response.json();
+return new Date(JSON.parse(data.files['contador.json'].content).inicio);
+}
+
+// Función que actualiza el contador
+async function actualizarContador() {
+// Obtener la fecha/hora de inicio desde el Gist
+const inicio = await obtenerInicio();
+const ahora = new Date().getTime();
+const diferencia = ahora - inicio.getTime();
+
+// Calcular la diferencia y actualizar el contador en la página
+const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+document.getElementById('contador').innerHTML = dias + "d " + horas + "h "
++ minutos + "m " + segundos + "s ";
+}
+
+// Iniciar el contador
+actualizarContador();
+// Actualizar el contador cada segundo
+setInterval(actualizarContador, 1000);
+</script>
+
 </body>
 </html>
