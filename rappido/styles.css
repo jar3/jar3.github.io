@@ -109,6 +109,41 @@ footer a:hover {
     text-decoration: underline;
 }
 
+/* Planes */
+.planes {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.contenedor-planes {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.plan {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    margin: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.plan .precio {
+    color: green;
+    font-size: 1.5rem;
+}
+
+.plan button {
+    background-color: green;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     nav ul {
